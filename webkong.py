@@ -15,6 +15,9 @@ import aiohttp
 # Overridable so the same image can point at local dev (127.0.0.1:9014).
 BASE_URL = os.environ.get("WEBKONG_BASE", "https://greentie.dev/webkong").rstrip("/")
 
+# Presence text is not clickable, so show a short human-typeable address.
+_SITE = BASE_URL.removeprefix("https://").removeprefix("http://")
+
 # A slow WebKong response should never wedge the rotation loop, so bound it.
 _TIMEOUT = aiohttp.ClientTimeout(total=8)
 
@@ -116,8 +119,14 @@ async def build_frames(session: aiohttp.ClientSession) -> list[Frame] | None:
     # True empty state: no count, no broadcast, no co-op. Checking `frames` rather
     # than `count` keeps this from contradicting a live broadcast frame when the
     # API's count doesn't include broadcasters.
-    if not frames:
+    has_activity = bool(frames)
+    if not has_activity:
         frames.append(Frame("watching", "No one playing WebKong", idle=True))
+
+    # Always end the rotation with where to play, since the stats alone don't
+    # tell newcomers how to join in. Match the empty state's idle flag so the
+    # presence dot doesn't flicker between green and yellow on quiet nights.
+    frames.append(Frame("playing", f"at {_SITE}", idle=not has_activity))
 
     return frames
 

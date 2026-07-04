@@ -7,6 +7,8 @@ status line in the member-list sidebar:
 - `Watching 3 players online` (or `No one playing WebKong` when nobody is on)
 - `Watching Blueberry 29,600 (3-1)` when someone is broadcasting a run
 - `Playing Co-op 5-2: 145,000` when a co-op run is live, then rotates back out
+- `Playing at greentie.dev/webkong` always closes the rotation, so viewers
+  know where to go play
 
 Each frame shows for `ROTATE_INTERVAL_MS` (default 45s). Frames appear and
 disappear based on real activity, so the sidebar reflects what is actually
