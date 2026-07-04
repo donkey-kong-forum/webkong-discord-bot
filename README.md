@@ -26,14 +26,26 @@ happening right now.
 
 ## Run locally
 
+Requires Python 3.10+. Use `python3` explicitly for the venv setup; on some
+machines a bare `python` still resolves to Python 2, which fails with a
+`SyntaxError` on the type annotations.
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+# One-time setup.
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
 cp .env.example .env    # then paste your token into .env
-# Load .env into the shell however you prefer, e.g. with direnv, or:
+
+# Every session: activate the venv AND load .env into the shell.
+source .venv/bin/activate
 set -a && source .env && set +a
 python bot.py
 ```
+
+The bot reads plain environment variables and does not parse `.env` itself,
+so the `set -a && source .env && set +a` step is required every new shell
+session (or use direnv to automate it). Skipping it fails at boot with
+`KeyError: 'DISCORD_TOKEN'`.
 
 Within a rotation interval the bot should show a status under its name in the
 sidebar.
