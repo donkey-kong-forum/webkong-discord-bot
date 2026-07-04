@@ -20,7 +20,7 @@ from webkong import UNAVAILABLE_FRAME, Frame, build_frames
 # lag on fast flips, so a slower cadence reads more reliably than it costs.
 ROTATE_SECONDS = int(os.environ.get("ROTATE_INTERVAL_MS", "45000")) / 1000
 
-# Coolify wants a port to health-check; the bot needs no inbound traffic itself.
+# Some hosts want a port to health-check; the bot needs no inbound traffic itself.
 HEALTH_PORT = int(os.environ.get("PORT", "3000"))
 
 # Failing loud at boot beats a bot that silently never connects.
@@ -87,7 +87,7 @@ class WebKongBot(discord.Client):
 
 
 async def _start_health_server() -> None:
-    """Serve a 200 on /health so Coolify's healthcheck has something to hit."""
+    """Serve a 200 on /health for hosts whose healthchecks need an HTTP target."""
 
     async def handle(_request: web.Request) -> web.Response:
         return web.Response(text="ok")

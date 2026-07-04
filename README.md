@@ -50,15 +50,19 @@ session (or use direnv to automate it). Skipping it fails at boot with
 Within a rotation interval the bot should show a status under its name in the
 sidebar.
 
-## Deploy on Coolify
+## Deploy on Railway
 
-1. Push this folder to a Git repo Coolify can reach.
-2. New Resource > Application, pick the repo, build pack **Dockerfile**.
-3. Set environment variables: `DISCORD_TOKEN` (required); optionally
-   `ROTATE_INTERVAL_MS`, `WEBKONG_BASE`, `PORT`.
-4. The container exposes port `3000` with a `/health` route for the healthcheck.
-   This is only for Coolify; the bot needs no public domain, so you can leave it
-   without a mapped domain.
+1. [railway.com/new](https://railway.com/new) > **Deploy from GitHub repo** >
+   pick this repo. Railway detects the Dockerfile and builds automatically.
+   The first deploy crash-loops until the token is set; that is expected.
+2. In the service's **Variables** tab, set `DISCORD_TOKEN` (required);
+   optionally `ROTATE_INTERVAL_MS`, `WEBKONG_BASE`, `PORT`. Saving triggers a
+   redeploy.
+3. Leave networking alone: no public domain and no healthcheck path are
+   needed. The bot is outbound-only; Railway restarting the container when the
+   process dies is the right failure signal. (A `/health` route exists on port
+   `3000` for hosts that do require an HTTP healthcheck.)
+4. Pushes to `main` auto-deploy.
 
 ## Environment variables
 
@@ -67,4 +71,4 @@ sidebar.
 | `DISCORD_TOKEN`      | yes      | -                              | Bot token from the Developer Portal.      |
 | `WEBKONG_BASE`       | no       | `https://greentie.dev/webkong` | API base URL (override for local dev).    |
 | `ROTATE_INTERVAL_MS` | no       | `45000`                        | Milliseconds each frame is shown.         |
-| `PORT`               | no       | `3000`                         | Port for the Coolify healthcheck server.  |
+| `PORT`               | no       | `3000`                         | Port for the optional healthcheck server. |

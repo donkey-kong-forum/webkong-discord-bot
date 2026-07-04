@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY webkong.py bot.py ./
 
-# The health server listens here; Coolify maps it for its healthcheck.
+# The optional health server listens here; only needed if the host healthchecks.
 EXPOSE 3000
 
 CMD ["python", "bot.py"]
