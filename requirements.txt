@@ -1,0 +1,4 @@
+discord.py>=2.4,<3
+# Pulled in by discord.py, but listed because we import it directly for the
+# health server and the shared HTTP session.
+aiohttp>=3.9
