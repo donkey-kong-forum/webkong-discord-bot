@@ -4,9 +4,15 @@ A tiny Discord presence bot for the Kong League server. It polls the public
 [WebKong API](https://greentie.dev/webkong/api-docs.html) and rotates a live
 status line in the member-list sidebar:
 
-- `Watching 3 players online` (or `No one playing WebKong` when nobody is on)
 - `Watching Blueberry 29,600 (3-1)` when someone is broadcasting a run
 - `Playing Co-op 5-2: 145,000` when a co-op run is live, then rotates back out
+- `Watching 3 players online` alongside a live game, for context
+- `Watching 3 players in the lobby` (with an idle/yellow dot) when people are
+  around but there is nothing to spectate or join yet
+- `Watching No one playing WebKong` (idle) when the site is empty
+
+The presence dot is the summary: green means there is a game to watch or join
+right now; yellow means there is not.
 
 Each frame shows for `ROTATE_INTERVAL_MS` (default 45s). Frames appear and
 disappear based on real activity, so the sidebar reflects what is actually
