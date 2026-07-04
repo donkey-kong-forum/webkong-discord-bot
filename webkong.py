@@ -89,14 +89,7 @@ async def build_frames(session: aiohttp.ClientSession) -> list[Frame] | None:
     frames: list[Frame] = []
 
     broadcast = _top_broadcast(online.get("singlePlayerBroadcasts", []))
-
-    count = online.get("count", 0)
-    # A lone broadcaster's frame already implies someone is online, so skip the
-    # redundant count frame and let the live score line hold the screen.
-    if count > 0 and not (count == 1 and broadcast):
-        noun = "player" if count == 1 else "players"
-        frames.append(Frame("watching", f"{count} {noun} online"))
-
+    broadcast_frame: Frame | None = None
     if broadcast:
         name = str(broadcast.get("name") or "Someone")[:_MAX_NAME_LENGTH]
         score = _format_score(broadcast.get("score", 0))
@@ -106,7 +99,19 @@ async def build_frames(session: aiohttp.ClientSession) -> list[Frame] | None:
         level, stage = broadcast.get("level"), broadcast.get("stage")
         if level is not None and stage is not None:
             text += f" ({level}-{stage})"
-        frames.append(Frame("watching", text))
+        broadcast_frame = Frame("watching", text)
+        frames.append(broadcast_frame)
+
+    count = online.get("count", 0)
+    # A lone broadcaster's frame already implies someone is online, so skip the
+    # redundant count frame and let the live score line hold the screen.
+    if count > 0 and not (count == 1 and broadcast):
+        noun = "player" if count == 1 else "players"
+        frames.append(Frame("watching", f"{count} {noun} online"))
+        # The live run is the story and the count is wallpaper: give the run a
+        # second slot so it holds the screen for most of the cycle.
+        if broadcast_frame:
+            frames.append(broadcast_frame)
 
     # Only hit the co-op endpoint when a run is flagged active, to save a request.
     if online.get("coop", {}).get("active"):
