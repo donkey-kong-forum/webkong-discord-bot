@@ -102,26 +102,29 @@ async def build_frames(session: aiohttp.ClientSession) -> list[Frame] | None:
         broadcast_frame = Frame("watching", text)
         frames.append(broadcast_frame)
 
-    count = online.get("count", 0)
-    # A lone broadcaster's frame already implies someone is online, so skip the
-    # redundant count frame and let the live score line hold the screen.
-    if count > 0 and not (count == 1 and broadcast):
-        noun = "player" if count == 1 else "players"
-        frames.append(Frame("watching", f"{count} {noun} online"))
-        # The live run is the story and the count is wallpaper: give the run a
-        # second slot so it holds the screen for most of the cycle.
-        if broadcast_frame:
-            frames.append(broadcast_frame)
-
     # Only hit the co-op endpoint when a run is flagged active, to save a request.
     if online.get("coop", {}).get("active"):
         coop = await _get_json(session, "/api/v1/coop/players")
         frames.append(_coop_frame(coop))
 
-    # True empty state: no count, no broadcast, no co-op. Checking `frames` rather
-    # than `count` keeps this from contradicting a live broadcast frame when the
-    # API's count doesn't include broadcasters.
-    if not frames:
+    count = online.get("count", 0)
+    if frames:
+        # A game is live: the count adds context, but a lone broadcaster's frame
+        # already implies someone is online, so skip the redundant count then.
+        if count > 1 or (count == 1 and not broadcast):
+            noun = "player" if count == 1 else "players"
+            frames.append(Frame("watching", f"{count} {noun} online"))
+            # The live run is the story and the count is wallpaper: give the run
+            # a second slot so it holds the screen for most of the cycle.
+            if broadcast_frame:
+                frames.append(broadcast_frame)
+    elif count > 0:
+        # People are around but there is nothing to spectate or join, so do not
+        # bait a visit with a green dot; the lobby wording plus idle keeps the
+        # presence honest about what a visitor would actually find.
+        noun = "player" if count == 1 else "players"
+        frames.append(Frame("watching", f"{count} {noun} in the lobby", idle=True))
+    else:
         frames.append(Frame("watching", "No one playing WebKong", idle=True))
 
     return frames
